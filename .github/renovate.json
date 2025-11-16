@@ -14,6 +14,12 @@
     {
       "matchManagers": ["custom.regex", "ansible-galaxy"],
       "automerge": false
+    },
+    {
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["python/cpython"],
+      "automerge": true,
+      "automergeType": "pr"
     }
   ],
   "enabledManagers": [
@@ -33,7 +39,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/^ansible/vars/virtualbox_guest\\.yml$/",
-        "/^.github/workflows/build\\.yml$/"
+        "\\.github/workflows/.+\\.ya?ml$"
       ],
       "matchStrings": [
         "virtualbox_guest_virtualbox_version:\\s+\"(?<currentValue>[\\d\\.]+)\"",
@@ -55,6 +61,18 @@
       "depNameTemplate": "archlinux-installer",
       "versioningTemplate": "loose",
       "extractVersionTemplate": "archlinux-(?<version>.+)-x86_64\\.iso"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "\\.github/workflows/.+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "python-version:\\s+[\"'](?<currentValue>\\d+\\.\\d+)[\"']"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "python/cpython",
+      "versioningTemplate": "semver"
     }
   ],
   "customDatasources": {

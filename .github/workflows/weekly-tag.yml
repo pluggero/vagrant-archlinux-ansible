@@ -1,0 +1,45 @@
+---
+name: Create Weekly Tag
+
+on:
+  schedule:
+    # Run every Sunday at 1 AM UTC
+    - cron: '0 1 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create-tag:
+    name: Create Weekly Version Tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          # Generate tag in YYYY.MM.DD format
+          TAG_NAME=$(date -u +"%Y.%m.%d")
+
+          # Check if tag already exists
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists, skipping creation"
+            exit 0
+          fi
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create annotated tag
+          git tag -a "$TAG_NAME" -m "Weekly build for $TAG_NAME"
+
+          # Push tag
+          git push origin "$TAG_NAME"
+
+          echo "Created and pushed tag: $TAG_NAME"
