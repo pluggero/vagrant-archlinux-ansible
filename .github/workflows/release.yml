@@ -5,6 +5,7 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
 
 env:
   PACKER_OUTPUT: packer/outputs/archlinux-virtualbox-amd64/archlinux-virtualbox.box
@@ -13,70 +14,17 @@ env:
   SHORT_DESCRIPTION: Archlinux Vagrant box for Ansible Role Testing.
   PROVIDER: virtualbox
   ARCHITECTURE: amd64
-  VBOX_BRANCH: "7.1"
   VBOX_VERSION: "7.1.12"
-  # The build ID can be found in the URL of the VirtualBox iso file: https://download.virtualbox.org/virtualbox/
-  VBOX_BUILD_ID: "169651"
-  VBOX_DEB_DISTRO: "Ubuntu"
-  VBOX_DEB_CODENAME: "noble"
 
 jobs:
+  lint:
+    name: Lint
+    uses: ./.github/workflows/_lint.yml
+
   build:
-    name: Build Vagrant Box
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-
-      - name: Setup Packer
-        uses: hashicorp/setup-packer@1aa358be5cf73883762b302a3a03abd66e75b232 # v3
-
-      - name: Check and install VirtualBox
-        run: |
-          if ! VBoxManage --version | grep -q "${VBOX_VERSION}"; then
-            echo "Installing VirtualBox ${VBOX_VERSION}..."
-            wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc \
-              | sudo gpg --dearmor --yes -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
-            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] \
-              http://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" \
-              | sudo tee /etc/apt/sources.list.d/virtualbox.list
-            sudo apt update
-            sudo apt install -y linux-headers-$(uname -r) dkms
-            VBOX_DEB_FILE="virtualbox-${VBOX_BRANCH}_${VBOX_VERSION}-${VBOX_BUILD_ID}~${VBOX_DEB_DISTRO}~${VBOX_DEB_CODENAME}_amd64.deb"
-            wget "https://download.virtualbox.org/virtualbox/${VBOX_VERSION}/${VBOX_DEB_FILE}" -O /tmp/virtualbox.deb
-            sudo apt install -y /tmp/virtualbox.deb
-          else
-            echo "Correct VirtualBox version already installed."
-          fi
-
-      - name: Ensure USER and LOGNAME environment
-        run: |
-          echo "USER=$(whoami)" >> $GITHUB_ENV
-          echo "LOGNAME=$(whoami)" >> $GITHUB_ENV
-
-      - name: Verify VirtualBox installation
-        run: VBoxManage --version
-
-      - name: Make builder script executable
-        run: chmod +x ./scripts/archlinux_builder.sh
-
-      - name: Build the Vagrant box
-        run: ./scripts/archlinux_builder.sh
-
-      - name: Verify box file created
-        run: |
-          if [ ! -f "${{ env.PACKER_OUTPUT }}" ]; then
-            echo "❌ Box file not found!"
-            exit 1
-          fi
-          echo "✅ Box file found: ${{ env.PACKER_OUTPUT }}"
-
-      - name: Upload box artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
-        with:
-          name: vagrant-box
-          path: ${{ env.PACKER_OUTPUT }}
+    name: Build
+    uses: ./.github/workflows/_build.yml
+    needs: lint
 
   release:
     name: Release to HashiCorp Cloud
