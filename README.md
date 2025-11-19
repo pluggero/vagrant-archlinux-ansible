@@ -1,12 +1,13 @@
 # Archlinux Packer Template for Ansible Role Testing
 
-[![Build](https://github.com/pluggero/packer-archlinux-ansible/actions/workflows/build.yml/badge.svg)](https://github.com/pluggero/packer-archlinux-ansible/actions/workflows/build.yml)
+[![Build and Release](https://github.com/pluggero/packer-archlinux-ansible/actions/workflows/release.yml/badge.svg)](https://github.com/pluggero/packer-archlinux-ansible/actions/workflows/release.yml)
 
 ## ⚠️ Security Warning
 
 **This box is intended for testing and development purposes only. DO NOT use in production environments.**
 
 This Vagrant box contains:
+
 - Publicly known insecure SSH keys (Vagrant default keys)
 - Public passwords visible in the repository
 - Pre-configured users with known credentials
