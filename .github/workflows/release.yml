@@ -56,6 +56,12 @@ jobs:
           echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Get commit SHA and workflow URL
+        id: build_metadata
+        run: |
+          echo "commit_sha=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "workflow_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >> $GITHUB_OUTPUT
+
       - name: Authenticate to HCP
         id: hcp_auth
         run: |
@@ -121,9 +127,25 @@ jobs:
 
           if echo "$version_response" | grep -q '"code":5'; then
             echo "Version does not exist. Creating version '$VERSION'..."
+
+            # Construct description with build metadata
+            DESCRIPTION="${{ steps.tag_message.outputs.tag_message }}
+
+          Build Information
+          - VirtualBox version: ${VBOX_VERSION}
+          - Git commit: ${{ steps.build_metadata.outputs.commit_sha }}
+          - Build workflow: ${{ steps.build_metadata.outputs.workflow_url }}
+
+          To verify provenance (requires gh cli)
+              gh attestation verify oci://ghcr.io/${{ github.repository }}/vagrant-box:${VERSION} --owner ${{ github.repository_owner }}"
+
             curl --silent --fail --request POST --header "Authorization: Bearer $ACCESS_TOKEN" \
               --header "Content-Type: application/json" \
-          --data '{"name":"'"$VERSION"'","description":"'"${{ steps.tag_message.outputs.tag_message }}"' (VirtualBox version: '"$VBOX_VERSION"')","provider_names":["'"$PROVIDER"'"]}' \
+              --data "$(jq -n \
+                --arg name "$VERSION" \
+                --arg desc "$DESCRIPTION" \
+                --arg provider "$PROVIDER" \
+                '{name: $name, description: $desc, provider_names: [$provider]}')" \
               "https://api.cloud.hashicorp.com/vagrant/2022-09-30/registry/${REGISTRY}/box/${BOX_NAME}/versions" | jq .
             echo "Version created."
 
@@ -145,6 +167,22 @@ jobs:
             echo "Calculating box checksum..."
             checksum=$(sha256sum ./box/archlinux-virtualbox.box | awk '{print $1}')
             echo "Checksum: $checksum"
+
+            echo
+            echo "Creating checksums file with metadata..."
+            {
+              echo "$checksum  archlinux-virtualbox.box"
+              echo ""
+              echo "Build Metadata"
+              echo "- Version: $VERSION"
+              echo "- Git commit: ${{ steps.build_metadata.outputs.commit_sha }}"
+              echo "- Workflow run: ${{ steps.build_metadata.outputs.workflow_url }}"
+              echo "- Build date: $(date --utc +"%Y-%m-%d %H:%M:%S UTC")"
+              echo "- VirtualBox version: $VBOX_VERSION"
+              echo ""
+              echo "Repository: ${{ github.server_url }}/${{ github.repository }}"
+            } > ./box/checksums.txt
+            echo "Checksums file created."
 
             echo
             echo "Creating architecture '$ARCHITECTURE'..."
@@ -169,6 +207,19 @@ jobs:
             echo "Version already exists."
             echo "skip_upload=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Attest checksums file
+        if: steps.prepare_box.outputs.skip_upload == 'false'
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v2
+        with:
+          subject-path: ./box/checksums.txt
+
+      - name: Upload checksums as artifact
+        if: steps.prepare_box.outputs.skip_upload == 'false'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: checksums-${{ steps.set_version.outputs.version }}
+          path: ./box/checksums.txt
 
       - name: Upload box
         if: steps.prepare_box.outputs.skip_upload == 'false'
