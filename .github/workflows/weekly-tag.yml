@@ -47,7 +47,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Create annotated tag
-          git tag -a "$TAG_NAME" -m "Weekly build for $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "Weekly build $TAG_NAME"
 
           # Push tag (using the GitHub App token from checkout)
           git push origin "$TAG_NAME"
