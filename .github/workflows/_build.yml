@@ -3,6 +3,11 @@ name: Build
 
 on:
   workflow_call:
+    inputs:
+      upload-artifact:
+        description: "Whether to upload the built artifact"
+        type: boolean
+        default: false
     outputs:
       artifact-name:
         description: "The name of the uploaded artifact"
@@ -107,7 +112,9 @@ jobs:
           echo "✅ Box file found: ${{ env.PACKER_OUTPUT }}"
 
       - name: Upload box artifact
+        if: inputs.upload-artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: vagrant-box
           path: ${{ env.PACKER_OUTPUT }}
+          retention-days: 1
