@@ -141,8 +141,7 @@ jobs:
           - Git commit: ${{ steps.build_metadata.outputs.commit_sha }}
           - Build workflow: ${{ steps.build_metadata.outputs.workflow_url }}
 
-          To verify provenance (requires gh cli)
-              gh attestation verify oci://ghcr.io/${{ github.repository }}/vagrant-box:${VERSION} --owner ${{ github.repository_owner }}"
+          To verify provenance: https://github.com/${{ github.repository }}#verifying-box-provenance"
 
             curl --silent --fail --request POST --header "Authorization: Bearer $ACCESS_TOKEN" \
               --header "Content-Type: application/json" \
