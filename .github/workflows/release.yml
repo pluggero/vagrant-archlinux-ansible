@@ -210,7 +210,7 @@ jobs:
 
       - name: Attest checksums file
         if: steps.prepare_box.outputs.skip_upload == 'false'
-        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
           subject-path: ./box/checksums.txt
 
