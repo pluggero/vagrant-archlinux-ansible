@@ -39,7 +39,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/^ansible/vars/virtualbox_guest\\.yml$/",
-        "\\.github/workflows/.+\\.ya?ml$"
+        "/^.github/workflows/.+\\.ya?ml$/"
       ],
       "matchStrings": [
         "virtualbox_guest_virtualbox_version:\\s+\"(?<currentValue>[\\d\\.]+)\"",
