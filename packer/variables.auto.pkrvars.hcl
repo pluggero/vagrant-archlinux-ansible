@@ -5,6 +5,7 @@
 # Virtual Machine Settings
 vm_name                             = "archlinux"
 vm_guest_os_version                 = "2026.06.01"
+vm_guest_iso_checksum_x86_64        = "ec7a9c89aed7a59a76266ccf723c5e88480e47d7088c4482436f882fa37c3989"
 vm_boot_wait                        = "10s"
 vm_cpu_core                         = 4
 vm_mem_size                         = 4096

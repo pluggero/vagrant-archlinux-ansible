@@ -7,7 +7,7 @@
 locals {
   archlinux_iso_name_x86_64 = "archlinux-${var.vm_guest_os_version}-x86_64.iso"
   archlinux_iso_url_x86_64 = "https://ftp.halifax.rwth-aachen.de/archlinux/iso/${var.vm_guest_os_version}/${local.archlinux_iso_name_x86_64}"
-  archlinux_iso_checksum_x86_64 = "file:https://archlinux.org/iso/${var.vm_guest_os_version}/sha256sums.txt"
+  archlinux_iso_checksum_x86_64 = "sha256:${var.vm_guest_iso_checksum_x86_64}"
 }
 
 local "http_directory" {
@@ -60,6 +60,12 @@ variable "vm_guest_os_version" {
   description = "Version of guest os to install"
   type = string
   default = ""
+}
+
+variable "vm_guest_iso_checksum_x86_64" {
+  description = "Checksum of the iso installer"
+  type        = string
+  default     = ""
 }
 
 variable "vm_boot_wait" {
