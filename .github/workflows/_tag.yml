@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version tag to create (e.g., 2025.12.06)'
+        description: "Version tag to create (e.g., 2025.12.06)"
         required: true
         type: string
 
@@ -15,7 +15,7 @@ permissions:
 jobs:
   create-tag:
     name: Create and Push Tag
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout code

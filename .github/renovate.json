@@ -9,17 +9,23 @@
     {
       "matchManagers": ["github-actions", "pip_requirements"],
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "minimumReleaseAge": "7 days"
     },
     {
       "matchManagers": ["custom.regex", "ansible-galaxy"],
       "automerge": false
     },
     {
+      "matchDatasources": ["github-runners"],
+      "automerge": false
+    },
+    {
       "matchManagers": ["custom.regex"],
       "matchDepNames": ["python/cpython"],
       "automerge": true,
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "minimumReleaseAge": "7 days"
     }
   ],
   "enabledManagers": [
